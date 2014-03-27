@@ -113,7 +113,7 @@ module.exports = function(grunt) {
 
   grunt.registerTask('server-prod', [ /* fill out with server tasks */
   ]);
-  grunt.registerTask('server-dev'), [
+  grunt.registerTask('server-dev', [
   ]);
 
   grunt.registerTask('upload', function(n) {
