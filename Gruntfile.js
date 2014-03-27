@@ -4,7 +4,7 @@ module.exports = function(grunt) {
     pkg: grunt.file.readJSON('package.json'),
     concat: {
       options: {
-        separator: ';'
+        separator: ';\n'
       },
       dist: {
         src: ['public/*/*.js'],
@@ -33,17 +33,19 @@ module.exports = function(grunt) {
       },
       dist: {
         files: {
-          'public/dist/<% pkg.name %>.min.js': ['<%= concat.dist.dest %>']
+          'public/dist/<%= pkg.name %>.min.js': ['<%= concat.dist.dest %>']
         }
       }
     },
 
     jshint: {
       files: [
-        // Add filespec list here
+        'app/**/*.js',
+        'app/*.js',
+        'public/client/*.js'
       ],
       options: {
-        force: 'true',
+        force: 'false',
         jshintrc: '.jshintrc',
         ignores: [
           'public/lib/**/*.js',
@@ -53,6 +55,14 @@ module.exports = function(grunt) {
     },
 
     cssmin: {
+      options: {
+        banner: '/* This CSS minified on <%= grunt.template.today("dd-mm-yyyy") %>*/\n'
+      },
+      dist: {
+        files: {
+          'public/dist/style.min.css': ['public/style.css']
+        }
+      }
     },
 
     watch: {
@@ -74,8 +84,16 @@ module.exports = function(grunt) {
 
     shell: {
       prodServer: {
+        command: 'git push azure master'
       }
     },
+
+    clean: {
+      build: {
+        src: ['public/dist/']
+      }
+    }
+
   });
 
   grunt.loadNpmTasks('grunt-contrib-uglify');
@@ -84,6 +102,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-cssmin');
   grunt.loadNpmTasks('grunt-mocha-test');
+  grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-shell');
   grunt.loadNpmTasks('grunt-nodemon');
 
@@ -105,15 +124,15 @@ module.exports = function(grunt) {
   ////////////////////////////////////////////////////
 
   grunt.registerTask('test', [
-    'mochaTest'
+    'jshint','mochaTest'
   ]);
 
   grunt.registerTask('build', [
+    'clean','concat', 'uglify', 'cssmin'
   ]);
 
-  grunt.registerTask('server-prod', [ /* fill out with server tasks */
-  ]);
-  grunt.registerTask('server-dev', [
+  grunt.registerTask('server-prod', [
+    'deploy', 'shell:prodServer'
   ]);
 
   grunt.registerTask('upload', function(n) {
@@ -125,7 +144,7 @@ module.exports = function(grunt) {
   });
 
   grunt.registerTask('deploy', [
-    // add your deploy tasks here
+    'test','build'
   ]);
 
 };
